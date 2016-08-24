@@ -1,5 +1,5 @@
 from __future__ import print_function
-import requests, os, time, json
+import requests, os, time, json, sys
 
 '''
 Image Grading
@@ -57,12 +57,7 @@ def stringifyAlbumData(data):
 		)
 
 if __name__ == '__main__':
-	data = grabImgurAlbumData('https://imgur.com/gallery/WqDEO')
-	print(stringifyAlbumData(data))
-	print('\n')
-	data = grabImgurAlbumData('https://imgur.com/a/qqi1l')
-	print(stringifyAlbumData(data))
-	
-	print('\n')
-	data = grabImgurAlbumData('https://imgur.com/gallery/dtjI3?lr=0')
-	print(stringifyAlbumData(data))
+	if len(sys.argv) == 2:
+		print(stringifyAlbumData(grabImgurAlbumData(sys.argv[1])))
+	else:
+		print("usage: %s [imgur album url]" % sys.argv[0]);
