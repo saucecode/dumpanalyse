@@ -44,7 +44,7 @@ def stringifyAlbumData(data):
 		elif 1.0/ratio > 1.45: ratios['phone'] += 1
 		else: ratios['square'] += 1
 		
-	return '%i Images / %.2f%% 2160p, %.2f%% 1440p, %.2f%% 1080p, %.2f%% 720p, %.2f%% <720p / %.2f%% Desktop, %.2f%% Phone, %.2f%% Square-ish' % (
+	'''return '%i Images / %.2f%% 2160p, %.2f%% 1440p, %.2f%% 1080p, %.2f%% 720p, %.2f%% <720p / %.2f%% Desktop, %.2f%% Phone, %.2f%% Square-ish' % (
 		data['count'],
 		100*grades['2160p']/count,
 		100*grades['1440p']/count,
@@ -54,7 +54,8 @@ def stringifyAlbumData(data):
 		100*ratios['desktop']/count,
 		100*ratios['phone']/count,
 		100*ratios['square']/count,
-		)
+		)'''
+	return grades, ratios, count
 
 if __name__ == '__main__':
 	if len(sys.argv) == 2:
