@@ -11,3 +11,11 @@ Here are some sample outputs so far.
 
 `$ python dumpanalyse_bot.py https://imgur.com/gallery/EKecE`  
 `20 Images / 0.00% 2160p, 0.00% 1440p, 20.00% 1080p, 20.00% 720p, 60.00% <720p / 90.00% Desktop, 5.00% Phone, 5.00% Square-ish`
+
+### Image Ratios
+
+An image is considered a **Desktop** image if `width/height` is greater than 1.45.  
+It is considered a **Phone** image if `height/width` is greater than 1.45.  
+All other images are considered square.
+
+4:3 and 5:4 images both qualify as square images.
