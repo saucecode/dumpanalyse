@@ -33,16 +33,18 @@ def stringifyAlbumData(data):
 	ratios = {'desktop':0.0, 'phone':0.0, 'square':0.0}
 	count = data['count']
 	for i in data['images']:
-		if i['height'] >= 2160 - 100: grades['2160p'] += 1
-		elif i['height'] >= 1440 - 100: grades['1440p'] += 1
-		elif i['height'] >= 1080 - 100: grades['1080p'] += 1
-		elif i['height'] >= 720: grades['720p'] += 1
-		else: grades['small'] += 1
-		
 		ratio = i['width']/1.0/i['height']
 		if ratio > 1.45: ratios['desktop'] += 1
 		elif 1.0/ratio > 1.45: ratios['phone'] += 1
 		else: ratios['square'] += 1
+		
+		shortest_edge = min(i['height'], i['width'])
+		
+		if shortest_edge >= 2160 - 100: grades['2160p'] += 1
+		elif shortest_edge >= 1440 - 100: grades['1440p'] += 1
+		elif shortest_edge >= 1080 - 100: grades['1080p'] += 1
+		elif shortest_edge >= 720: grades['720p'] += 1
+		else: grades['small'] += 1
 		
 	'''return '%i Images / %.2f%% 2160p, %.2f%% 1440p, %.2f%% 1080p, %.2f%% 720p, %.2f%% <720p / %.2f%% Desktop, %.2f%% Phone, %.2f%% Square-ish' % (
 		data['count'],
