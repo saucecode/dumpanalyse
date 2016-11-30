@@ -1,66 +1,60 @@
-from __future__ import print_function
-import requests, os, time, json, sys
+from dumpanalyse import *
+import praw, json, getpass
 
-'''
-Image Grading
-2160p (3840x2160)
-1440p (2560x1440)
-1080p (1920x1080)
-720p (1280x720)
-
-'''
-
-# downloads data about an imgur album
-def grabImgurAlbumData(url):
-	if not ('://imgur.com/a/' in url or '://imgur.com/gallery/' in url):
-		return False
+def generateComment(grades, ratios, count):
+	percentages = {
+		'2160p': grades['2160p']/count,
+		'1440p': grades['1440p']/count,
+		'1080p': grades['1080p']/count,
+		'720p': grades['720p']/count,
+		'small': grades['small']/count
+	}
 	
-	album_id = ''
+	running_percentage = 0.0
+	inputs = []
 	
-	if '://imgur.com/gallery/' in url or '://imgur.com/a/' in url:
-		album_id = url.split('/')[4].split('#')[0].split('?')[0]
-	r = requests.get('http://imgur.com/a/%s/layout/blog' % (album_id,))
+	# first table
+	for i in percentages:
+		inputs.append(percentages[i])
+		running_percentage += percentages[i]
+		inputs.append(running_percentage)
+		inputs.append(grades[i])
 	
-	if not r.status_code == 200: return False
-	if not 'album_images":{"count":' in r.text: return False
+	# second table
+	inputs.append(ratios['desktop'])
+	inputs.append(ratios['square'])
+	inputs.append(ratios['phone'])
 	
-	json_data = json.loads(r.text.split('album_images":')[1].split(',"place":')[0])
+	output = '''Quality | Percentage | Running Percentage | Count
+---- | ---- | ---- | ----
+2160p | %.2f%% | %.2f%% | %i
+1440p | %.2f%% | %.2f%% | %i
+1080p | %.2f%% | %.2f%% | %i
+720p | %.2f%% | %.2f%% | %i
+<720p | %.2f%% | %.2f%% | %i
 
-	return json_data
+Ratio | Percentage
+---- | ----
+Desktop | %.2f
+Square | %.2f
+Phone | %.2f
 
-def stringifyAlbumData(data):
-	grades = {'2160p':0.0, '1440p':0.0, '1080p':0.0, '720p':0.0, 'small':0.0}
-	ratios = {'desktop':0.0, 'phone':0.0, 'square':0.0}
-	count = data['count']
-	for i in data['images']:
-		ratio = i['width']/1.0/i['height']
-		if ratio > 1.45: ratios['desktop'] += 1
-		elif 1.0/ratio > 1.45: ratios['phone'] += 1
-		else: ratios['square'] += 1
-		
-		shortest_edge = min(i['height'], i['width'])
-		
-		if shortest_edge >= 2160 - 100: grades['2160p'] += 1
-		elif shortest_edge >= 1440 - 100: grades['1440p'] += 1
-		elif shortest_edge >= 1080 - 100: grades['1080p'] += 1
-		elif shortest_edge >= 720: grades['720p'] += 1
-		else: grades['small'] += 1
-		
-	'''return '%i Images / %.2f%% 2160p, %.2f%% 1440p, %.2f%% 1080p, %.2f%% 720p, %.2f%% <720p / %.2f%% Desktop, %.2f%% Phone, %.2f%% Square-ish' % (
-		data['count'],
-		100*grades['2160p']/count,
-		100*grades['1440p']/count,
-		100*grades['1080p']/count,
-		100*grades['720p']/count,
-		100*grades['small']/count,
-		100*ratios['desktop']/count,
-		100*ratios['phone']/count,
-		100*ratios['square']/count,
-		)'''
-	return grades, ratios, count
+^(This is a test post for a future bot. Please ignore.)
+''' % tuple(inputs)
+	return output
+	
 
 if __name__ == '__main__':
-	if len(sys.argv) == 2:
-		print(stringifyAlbumData(grabImgurAlbumData(sys.argv[1])))
-	else:
-		print("usage: %s [imgur album url]" % sys.argv[0]);
+	with open('configuration.json', 'rb') as f:
+		data = json.load(f)
+		reddit = praw.Reddit(
+			user_agent='dumpanalyse by /u/saucecode',
+		
+			client_id=data['client_id'],
+			client_secret=data['client_secret'],
+		
+			username=data['username'],
+			password=getpass.getpass('enter password for %s: ' % data['username'])
+		)
+	
+	print(generateComment(*stringifyAlbumData(grabImgurAlbumData('http://imgur.com/gallery/QKa32'))))
