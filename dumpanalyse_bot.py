@@ -3,15 +3,17 @@ import praw, json, getpass
 
 def generateComment(grades, ratios, count):
 	percentages = {
-		'2160p': grades['2160p']/count,
-		'1440p': grades['1440p']/count,
-		'1080p': grades['1080p']/count,
-		'720p': grades['720p']/count,
-		'small': grades['small']/count
+		'2160p': 100.0*grades['2160p']/count,
+		'1440p': 100.0*grades['1440p']/count,
+		'1080p': 100.0*grades['1080p']/count,
+		'720p': 100.0*grades['720p']/count,
+		'small': 100.0*grades['small']/count
 	}
 	
 	running_percentage = 0.0
 	inputs = []
+	
+	inputs.append(count)
 	
 	# first table
 	for i in percentages:
@@ -25,21 +27,23 @@ def generateComment(grades, ratios, count):
 	inputs.append(ratios['square'])
 	inputs.append(ratios['phone'])
 	
-	output = '''Quality | Percentage | Running Percentage | Count
+	output = '''An image album analysis of %i images.
+
+Quality | Percentage | Running Percentage | Count
 ---- | ---- | ---- | ----
-2160p | %.2f%% | %.2f%% | %i
-1440p | %.2f%% | %.2f%% | %i
-1080p | %.2f%% | %.2f%% | %i
-720p | %.2f%% | %.2f%% | %i
-<720p | %.2f%% | %.2f%% | %i
+2160p | %.1f%% | %.1f%% | %i
+1440p | %.1f%% | %.1f%% | %i
+1080p | %.1f%% | %.1f%% | %i
+720p | %.1f%% | %.1f%% | %i
+<720p | %.1f%% | %.1f%% | %i
 
 Ratio | Percentage
 ---- | ----
-Desktop | %.2f
-Square | %.2f
-Phone | %.2f
+Desktop | %.1f
+Square | %.1f
+Phone | %.1f
 
-^(This is a test post for a future bot. Please ignore.)
+[^(I am a bot)](https://github.com/saucecode/dumpanalyse)^(, and this dump analysis was automatically generated.) [^(Bleep bloop)](https://www.reddit.com/message/compose/?to=wallpaper-cruncher)^.
 ''' % tuple(inputs)
 	return output
 	
@@ -57,4 +61,4 @@ if __name__ == '__main__':
 			password=getpass.getpass('enter password for %s: ' % data['username'])
 		)
 	
-	print(generateComment(*stringifyAlbumData(grabImgurAlbumData('http://imgur.com/gallery/QKa32'))))
+	print(generateComments(stringifyAlbumData(grabImgurAlbumData('http://imgur.com/gallery/QKa32'))))
